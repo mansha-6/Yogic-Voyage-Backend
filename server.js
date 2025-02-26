@@ -7,7 +7,7 @@ const authRoutes = require("./routes/authRoutes"); // Import auth routes
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(cors({ origin: "*" }));  // Allow frontend to communicate with backend
 
 // MongoDB Connection
 const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/yogaDB";
