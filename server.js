@@ -12,7 +12,7 @@ app.use(express.json());
 // ✅ Define CORS properly
 
 const corsOptions = {
-  origin: ["https://vercel.com/manshas-projects-91db753e/yogic-voyage/5Ym9PieCcombNgoVUf9TkLwVBSTr"], // Frontend URL
+  origin: ["*"], // Frontend URL
   methods: "GET,POST,PUT,DELETE",
   credentials: true,
 };
@@ -52,6 +52,8 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on http://localhost:${PORT}`);
+}).on("error", (err) => {
+  console.error("❌ Server startup error:", err);
 });
 
 module.exports = app;
