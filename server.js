@@ -10,13 +10,15 @@ const app = express();
 app.use(express.json());
 
 // ✅ Define CORS properly
+
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || "https://yogic-voyage.vercel.app/", // Change this to your actual frontend URL
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  origin: ["https://vercel.com/manshas-projects-91db753e/yogic-voyage/5Ym9PieCcombNgoVUf9TkLwVBSTr"], // Frontend URL
+  methods: "GET,POST,PUT,DELETE",
   credentials: true,
 };
 
 app.use(cors(corsOptions));
+
 
 // ✅ MongoDB Connection with Retry Mechanism
 const MONGO_URI = process.env.MONGO_URI;
