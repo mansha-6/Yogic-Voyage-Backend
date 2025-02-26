@@ -6,80 +6,83 @@ const router = express.Router();
 
 // ✅ Sign-In Route
 router.post("/signin", async (req, res) => {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-        console.log("❌ Missing email or password");
-        return res.status(400).json({ error: "All fields are required" });
-    }
-
     try {
+        const { email, password } = req.body;
+
+        // ✅ Validate input fields
+        if (!email || !password) {
+            console.warn("❌ Missing email or password");
+            return res.status(400).json({ error: "All fields are required" });
+        }
+
         console.log("🔍 Checking email:", email);
 
-        // Find user in DB
-        const user = await User.findOne({ email });
+        // ✅ Find user in DB (Include password for validation)
+        const user = await User.findOne({ email }).select("+password");
 
         if (!user) {
-            console.log("❌ User not found");
+            console.warn("❌ User not found");
             return res.status(401).json({ error: "Invalid email or password" });
         }
 
-        console.log("✅ User found. Stored hashed password:", `"${user.password}"`);
-        console.log("🔍 Entered Password (trimmed):", `"${password.trim()}"`);
-        console.log("🛠 Comparing bcrypt.compare(password, user.password)...");
+        console.log("✅ User found. Checking password...");
 
-        // Compare input password with stored hash
-        const isMatch = await bcrypt.compare(password.trim(), user.password);
-
-        console.log("🔄 bcrypt.compare result:", isMatch);
+        // ✅ Compare input password with stored hash
+        const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
-            console.log("❌ Password does not match");
+            console.warn("❌ Password does not match");
             return res.status(401).json({ error: "Invalid email or password" });
         }
 
         console.log("✅ Password matched! Logging in...");
+
         res.status(200).json({ message: "Sign-In Successful!" });
 
     } catch (error) {
-        console.error("🔥 Server error:", error);
-        res.status(500).json({ error: "Server error" });
+        console.error("🔥 Server error during sign-in:", error);
+        res.status(500).json({ error: "Internal server error" });
     }
 });
 
-
 // ✅ Sign-Up Route
 router.post("/signup", async (req, res) => {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-        return res.status(400).json({ error: "All fields are required" });
-    }
-
     try {
+        const { email, password } = req.body;
+
+        // ✅ Validate input fields
+        if (!email || !password) {
+            console.warn("❌ Missing email or password");
+            return res.status(400).json({ error: "All fields are required" });
+        }
+
+        console.log("🔍 Checking if user exists:", email);
+
         // ✅ Check if user already exists
         const existingUser = await User.findOne({ email });
 
         if (existingUser) {
-            return res.status(400).json({ error: "User already exists" });
+            console.warn("❌ User already exists");
+            return res.status(409).json({ error: "User already exists" });
         }
 
-        console.log("🔑 Received Plain Password:", password);
+        console.log("🔑 Hashing password...");
 
-        // ❌ Do NOT hash password here (Mongoose will do it in `pre("save")`)
-        const newUser = new User({ email, password });
+        // ✅ Hash password before saving
+        const hashedPassword = await bcrypt.hash(password, 10);
 
+        // ✅ Create and save new user
+        const newUser = new User({ email, password: hashedPassword });
         await newUser.save();
+
         console.log("✅ User registered successfully:", email);
-        console.log("✅ Stored Hashed Password in DB (After Saving):", newUser.password);
 
         res.status(201).json({ message: "Account created successfully!" });
 
     } catch (error) {
-        console.error("🔥 Signup error:", error);
-        res.status(500).json({ error: "Server error" });
+        console.error("🔥 Server error during sign-up:", error);
+        res.status(500).json({ error: "Internal server error" });
     }
 });
-
 
 module.exports = router;
