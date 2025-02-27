@@ -11,12 +11,13 @@ app.use(express.json());
 
 // ✅ Define CORS properly
 const corsOptions = {
-  origin: ["*"], // Frontend URL
+  origin: process.env.FRONTEND_URL, // Allow frontend
   methods: "GET,POST,PUT,DELETE",
   credentials: true,
 };
 
 app.use(cors(corsOptions));
+
 
 // ✅ MongoDB Connection with Retry Mechanism
 const MONGO_URI = process.env.MONGO_URI;
