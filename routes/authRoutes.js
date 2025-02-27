@@ -9,34 +9,42 @@ router.post("/signin", async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // ✅ Validate input fields
+        console.log("🛠 Received Sign-In Request");
+        console.log("📩 Email from request:", email);
+        console.log("🔑 Password from request:", password);
+
         if (!email || !password) {
             console.warn("❌ Missing email or password");
             return res.status(400).json({ error: "All fields are required" });
         }
 
-        console.log("🔍 Checking email:", email);
+        console.log("🔍 Checking database for email:", email);
 
-        // ✅ Find user in DB (Include password for validation)
+        // Find user in database
         const user = await User.findOne({ email }).select("+password");
 
         if (!user) {
-            console.warn("❌ User not found");
+            console.warn("❌ User not found in DB:", email);
             return res.status(401).json({ error: "Invalid email or password" });
         }
 
-        console.log("✅ User found. Checking password...");
+        console.log("✅ User found in database:", user.email);
+        
+        // 🛠 **DEBUG: Log Passwords Before Comparison**
+        console.log("🔍 Comparing Entered Password:", password);
+        console.log("🔍 Comparing Hashed Password in DB:", user.password);
 
-        // ✅ Compare input password with stored hash
+        // Compare the password
         const isMatch = await bcrypt.compare(password, user.password);
 
+        console.log("🔍 Password Match Result:", isMatch ? "✅ Matched" : "❌ Not Matched");
+
         if (!isMatch) {
-            console.warn("❌ Password does not match");
+            console.warn("❌ Password mismatch for user:", email);
             return res.status(401).json({ error: "Invalid email or password" });
         }
 
-        console.log("✅ Password matched! Logging in...");
-
+        console.log("✅ Login successful!");
         res.status(200).json({ message: "Sign-In Successful!" });
 
     } catch (error) {
@@ -45,34 +53,23 @@ router.post("/signin", async (req, res) => {
     }
 });
 
-// ✅ Sign-Up Route
+
+// ✅ Sign-Up Route (Fix)
 router.post("/signup", async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // ✅ Validate input fields
-        if (!email || !password) {
-            console.warn("❌ Missing email or password");
-            return res.status(400).json({ error: "All fields are required" });
-        }
+        console.log("📝 Signing up:", email);
 
-        console.log("🔍 Checking if user exists:", email);
-
-        // ✅ Check if user already exists
+        // Check if user already exists
         const existingUser = await User.findOne({ email });
-
         if (existingUser) {
-            console.warn("❌ User already exists");
+            console.warn("❌ User already exists:", email);
             return res.status(409).json({ error: "User already exists" });
         }
 
-        console.log("🔑 Hashing password...");
-
-        // ✅ Hash password before saving
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // ✅ Create and save new user
-        const newUser = new User({ email, password: hashedPassword });
+        // ✅ Create the user (mongoose will auto-hash the password)
+        const newUser = new User({ email, password });
         await newUser.save();
 
         console.log("✅ User registered successfully:", email);
@@ -84,5 +81,7 @@ router.post("/signup", async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 });
+
+
 
 module.exports = router;

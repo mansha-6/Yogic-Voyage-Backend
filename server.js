@@ -10,7 +10,6 @@ const app = express();
 app.use(express.json());
 
 // ✅ Define CORS properly
-
 const corsOptions = {
   origin: ["*"], // Frontend URL
   methods: "GET,POST,PUT,DELETE",
@@ -18,7 +17,6 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-
 
 // ✅ MongoDB Connection with Retry Mechanism
 const MONGO_URI = process.env.MONGO_URI;
@@ -30,16 +28,19 @@ if (!MONGO_URI) {
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(MONGO_URI, {
-      serverSelectionTimeoutMS: 5000, // Timeout after 5 seconds if no connection
-    });
+    await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
     console.log("✅ Connected to MongoDB Atlas");
+
+    // ✅ Log the actual database name
+    console.log("🗄️ Using Database:", mongoose.connection.db.databaseName);
+
   } catch (err) {
     console.error("❌ MongoDB connection error:", err);
-    setTimeout(connectDB, 5000); // Retry connection after 5 seconds
+    setTimeout(connectDB, 5000);
   }
 };
 
+// 🛠️ Call connectDB() before starting the server
 connectDB();
 
 app.get("/", (req, res) => {
