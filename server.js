@@ -29,17 +29,21 @@ if (!MONGO_URI) {
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
+    await mongoose.connect(process.env.MONGO_URI, {
+      serverSelectionTimeoutMS: 5000,
+    });
+
     console.log("✅ Connected to MongoDB Atlas");
 
-    // ✅ Log the actual database name
-    console.log("🗄️ Using Database:", mongoose.connection.db.databaseName);
+    // ✅ Ensure the correct database is being used
+    console.log("🗄️ Using Database:", mongoose.connection.name);
 
   } catch (err) {
     console.error("❌ MongoDB connection error:", err);
     setTimeout(connectDB, 5000);
   }
 };
+
 
 // 🛠️ Call connectDB() before starting the server
 connectDB();
