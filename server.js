@@ -34,9 +34,7 @@ const connectDB = async () => {
     });
 
     console.log("✅ Connected to MongoDB Atlas");
-
-    // ✅ Ensure the correct database is being used
-    console.log("🗄️ Using Database:", mongoose.connection.name);
+    console.log("🗄️ Using Database:", mongoose.connection.name); // Log Database Name
 
   } catch (err) {
     console.error("❌ MongoDB connection error:", err);
@@ -44,8 +42,6 @@ const connectDB = async () => {
   }
 };
 
-
-// 🛠️ Call connectDB() before starting the server
 connectDB();
 
 app.get("/", (req, res) => {
